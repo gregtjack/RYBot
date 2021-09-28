@@ -8,6 +8,6 @@ export default {
   testOnly: true, // Only register a slash command for the testing guilds
   
   callback: ({}) => {
-    return 'Pong'
+    return '🎺'
   }
 } as ICommand

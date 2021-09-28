@@ -22,7 +22,7 @@ export default class ConfirmationDialogue {
      * Send the Dialogue to the user
      * @param message Custom message to show the user
      */
-    public async send(message: string = 'Are you sure?', callback: (status: number, click: Discord.ButtonInteraction) => void) {
+    public async send(message: string = 'Are you sure?', callback: (status: number) => void) {
         const row = new MessageActionRow()
             .addComponents([               
                 new MessageButton()
@@ -53,7 +53,17 @@ export default class ConfirmationDialogue {
         collector.on('end', (collection) => {
             collection.forEach((click) => {
                 if (click.customId === 'confirm') {
-                    callback(Discord.Constants.MessageButtonStyles.SUCCESS, click)
+                    callback(Discord.Constants.MessageButtonStyles.SUCCESS)
+                    this.interaction.editReply({
+                        content: 'Confirmed',
+                        components: []
+                    })
+                } else {
+                    callback(Discord.Constants.MessageButtonStyles.DANGER)
+                    this.interaction.editReply({
+                        content: 'Cancelled',
+                        components: []
+                    })
                 }
             })
         })
