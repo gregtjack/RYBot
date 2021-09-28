@@ -12,7 +12,10 @@ const client = new Discord.Client({
     ]
 })
 
+
+
 client.on('ready', () => {
+    client.user?.setActivity('🎺', { type: 'PLAYING' })
     const wok = new WOKCommands(client, {
       // The name of the local folder for your command files
       commandsDir: path.join(__dirname, 'commands'),

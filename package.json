@@ -1,7 +1,7 @@
 {
   "name": "rybot",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Discord bot made for the RYB Server",
   "main": "index.js",
   "scripts": {
     "start": "node src/bot.js"
@@ -18,5 +18,13 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.13"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregorious-j/RYBot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gregorious-j/RYBot/issues"
+  },
+  "homepage": "https://github.com/gregorious-j/RYBot#readme"
 }
