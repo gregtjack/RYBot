@@ -8,8 +8,8 @@ export default {
   slash: true, 
   cooldown: '1m',
   testOnly: true, 
-  minArgs: 4,
-  expectedArgs: '<title> <time> <hideVotes?> <option1> <option2> <option3> <option4>',
+  minArgs: 5,
+  expectedArgs: '<title> <time> <hide_names> <option1> <option2> <option3> <option4>',
 
   options: [
     {
@@ -25,8 +25,8 @@ export default {
         type: DiscordJS.Constants.ApplicationCommandOptionTypes.NUMBER
     },
     {
-        name: 'hide_votes',
-        description: 'Hide votes until time is up',
+        name: 'hide_names',
+        description: 'Don\'t show who voted for what',
         required: true,
         type: DiscordJS.Constants.ApplicationCommandOptionTypes.BOOLEAN
     },
@@ -57,7 +57,7 @@ export default {
   ],
   
   callback: async ({ interaction: msgInt, args, channel }) => {
-    const [title, time, hideVotes, ...options] = args
+    const [title, time, is_anonymous, ...options] = args
     const row = new MessageActionRow()
     const embed = new MessageEmbed()
         .setAuthor(msgInt.user.username + ' created a poll', msgInt.user.displayAvatarURL())
@@ -66,7 +66,8 @@ export default {
         .setFooter(`This poll is set to last for ${time} day(s)`)
 
     let votes = new Map()
-    let voters = new Map()
+    let hasVoted = new Map()
+    let voters: Map<string, DiscordJS.User[]> = new Map()
     let optionIdToName = new Map()
 
     options.forEach((option, i) => {
@@ -77,7 +78,11 @@ export default {
         )
         optionIdToName.set(`option_${i}`, option)
         votes.set(`option_${i}`, 0)
-        if (hideVotes == 'false') embed.addField(option, '0 (0%)')
+        if (is_anonymous == "false") { 
+            embed.addField(option, '(0%)')
+        } else {
+            embed.addField(option, '0 vote(s) (0%)')
+        }
     })
     const confirm = new ConfirmationDialogue(msgInt, channel).send('Create the poll?', async (done) => {
         if (done === DiscordJS.Constants.MessageButtonStyles.SUCCESS) {
@@ -97,8 +102,13 @@ export default {
             let totalVotes = 0
 
             collector.on('collect', (click) => {
-                if (!voters.has(click.user.id)) {
-                    voters.set(click.user.id, 1);
+                if (!hasVoted.has(click.user.id)) {
+                    hasVoted.set(click.user.id, true);
+                    if (voters.get(click.customId)) {
+                        voters.get(click.customId)?.push(click.user)
+                    } else {
+                        voters.set(click.customId, [click.user])
+                    }
                     votes.set(click.customId, (votes.get(click.customId ?? 0) + 1))
                     totalVotes += 1
                     const newEmbed = new MessageEmbed()
@@ -107,21 +117,25 @@ export default {
                         .setColor('RED')
                         .setFooter(`This poll is set to last for ${time} day(s)`)
 
-                    votes.forEach((k, v) => {
-                        if (hideVotes == 'false') newEmbed.addField(optionIdToName.get(v), `${k} (${((k/totalVotes) * 100).toFixed(0)}%)`)
+                    votes.forEach((v, k) => {
+                        if (is_anonymous == 'false') {
+                            newEmbed.addField(optionIdToName.get(k), `${voters.get(k)?.join(' ') ?? ''} (${((v/totalVotes) * 100).toFixed(0)}%)`)
+                        } else {
+                            newEmbed.addField(optionIdToName.get(k), `${v} vote(s) (${((v/totalVotes) * 100).toFixed(0)}%)`)
+                        }
                     })
 
-                    if (hideVotes == 'false') poll.edit({
+                    poll.edit({
                         embeds: [newEmbed]
                     })
 
                     click.reply({
-                        content: 'Your vote was recorded!',
+                        content: 'Your vote was recorded',
                         ephemeral: true
                     })
                 } else {
                     click.reply({
-                        content: 'You cannot vote more than once',
+                        content: 'bruh you can\'t vote more than once',
                         ephemeral: true
                     })
                 }
