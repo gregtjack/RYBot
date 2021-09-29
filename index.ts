@@ -12,23 +12,25 @@ const client = new Discord.Client({
     ]
 })
 
-
-
 client.on('ready', () => {
     client.user?.setActivity('🎺', { type: 'PLAYING' })
-    const wok = new WOKCommands(client, {
-      // The name of the local folder for your command files
-      commandsDir: path.join(__dirname, 'commands'),
-      // Allow importing of .ts files if you are using ts-node
-      typeScript: true,
-      testServers: ['697496245463154788', '891807820545151007', '743291806917328957'],
-    })
-    .setBotOwner(['130317861183946753'])
-    .setDisplayName('RYBot')
-    .setDefaultPrefix('!')
-    .setColor('#d4ae04')
-    //const { commandHandler } = wok
-    console.log("Ready!")
+    new WOKCommands(client, {
+        // The name of the local folder for your command files
+        commandsDir: path.join(__dirname, 'commands'),
+        // Allow importing of .ts files if you are using ts-node
+        typeScript: true,
+        testServers: ['697496245463154788', '891807820545151007', '743291806917328957'],
+      })
+      .setCategorySettings([
+          {
+              name: 'General',
+              emoji: '🎺'
+          }
+      ])
+      .setBotOwner(['130317861183946753'])
+      .setDisplayName('RYBot')
+      .setDefaultPrefix('?')
+      .setColor('BLUE')
 })
 
 client.login(process.env.TOKEN)

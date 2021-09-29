@@ -4,18 +4,18 @@ export default class ConfirmationDialogue {
 
     private interaction: Discord.CommandInteraction
     private channel: Discord.TextChannel
-    private time: number
+    private seconds: number
 
     /**
      * Creates a new Confirmation Dialogue
      * @param interaction Interaction
      * @param channel Text Channel
-     * @param time Time in seconds to check for a response
+     * @param seconds Seconds to check for a response
      */
-    constructor(interaction: Discord.CommandInteraction, channel: Discord.TextChannel, time: number = 30) {
+    constructor(interaction: Discord.CommandInteraction, channel: Discord.TextChannel, seconds: number = 60) {
         this.interaction = interaction
         this.channel = channel
-        this.time = time
+        this.seconds = seconds
     }
 
     /**
@@ -47,7 +47,7 @@ export default class ConfirmationDialogue {
         const collector = this.channel.createMessageComponentCollector({
             filter,
             max: 1,
-            time: 1000 * this.time
+            time: 1000 * this.seconds
         })
 
         collector.on('end', (collection) => {

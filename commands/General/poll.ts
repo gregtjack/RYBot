@@ -1,6 +1,6 @@
 import { ICommand } from 'wokcommands'
 import DiscordJS, { MessageButton, MessageActionRow, MessageEmbed } from 'discord.js'
-import ConfirmationDialogue from '../util/confirm'
+import ConfirmationDialogue from '../../util/confirm'
 import prettyMilliseconds from 'pretty-ms'
 
 export default {
