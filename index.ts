@@ -21,7 +21,7 @@ client.on('ready', () => {
       commandsDir: path.join(__dirname, 'commands'),
       // Allow importing of .ts files if you are using ts-node
       typeScript: true,
-      testServers: ['697496245463154788', '891807820545151007'],
+      testServers: ['697496245463154788', '891807820545151007', '743291806917328957'],
     })
     .setBotOwner(['130317861183946753'])
     .setDisplayName('RYBot')
