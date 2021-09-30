@@ -41,7 +41,7 @@ export default class ConfirmationDialogue {
         })
 
         const filter = (btnInt: ButtonInteraction) => {
-            return this.interaction.user.id === btnInt.user.id
+            return this.interaction.member?.user.id === btnInt.user.id
         }
 
         const collector = this.channel.createMessageComponentCollector({

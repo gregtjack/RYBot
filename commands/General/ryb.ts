@@ -1,7 +1,7 @@
 import { ICommand } from 'wokcommands'
 
 export default {
-  category: 'general',
+  category: 'General',
   description: 'RYB', // Required for slash commands
   
   slash: 'both', // Create both a slash and legacy command
