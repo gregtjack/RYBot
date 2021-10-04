@@ -3,7 +3,6 @@ import Discord, { ButtonInteraction, MessageActionRow, MessageButton } from 'dis
 export default class ConfirmationDialogue {
 
     private interaction: Discord.CommandInteraction
-    private channel: Discord.TextChannel
     private seconds: number
 
     /**
@@ -12,9 +11,9 @@ export default class ConfirmationDialogue {
      * @param channel Text Channel
      * @param seconds Seconds to check for a response
      */
-    constructor(interaction: Discord.CommandInteraction, channel: Discord.TextChannel, seconds: number = 60) {
+    constructor(interaction: Discord.CommandInteraction, seconds: number = 60) {
         this.interaction = interaction
-        this.channel = channel
+        
         this.seconds = seconds
     }
 
@@ -44,28 +43,29 @@ export default class ConfirmationDialogue {
             return this.interaction.member?.user.id === btnInt.user.id
         }
 
-        const collector = this.channel.createMessageComponentCollector({
+        const collector = this.interaction?.channel?.createMessageComponentCollector({
             filter,
             max: 1,
             time: 1000 * this.seconds
         })
-
-        collector.on('end', (collection) => {
-            collection.forEach((click) => {
-                if (click.customId === 'confirm') {
-                    callback(Discord.Constants.MessageButtonStyles.SUCCESS)
-                    this.interaction.editReply({
-                        content: 'Confirmed',
-                        components: []
-                    })
-                } else {
-                    callback(Discord.Constants.MessageButtonStyles.DANGER)
-                    this.interaction.editReply({
-                        content: 'Cancelled',
-                        components: []
-                    })
-                }
+        
+        if (collector)
+            collector.on('end', (collection) => {
+                collection.forEach((click) => {
+                    if (click.customId === 'confirm') {
+                        callback(Discord.Constants.MessageButtonStyles.SUCCESS)
+                        this.interaction.editReply({
+                            content: 'Confirmed',
+                            components: []
+                        })
+                    } else {
+                        callback(Discord.Constants.MessageButtonStyles.DANGER)
+                        this.interaction.editReply({
+                            content: 'Cancelled',
+                            components: []
+                        })
+                    }
+                })
             })
-        })
     }
 }

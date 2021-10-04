@@ -1,7 +1,7 @@
 import Discord, { Intents } from 'discord.js'
-import WOKCommands from 'wokcommands'
 import dotenv from 'dotenv'
 import path from 'path'
+import RYBot from './rybot'
 dotenv.config()
 
 const client = new Discord.Client({
@@ -13,24 +13,11 @@ const client = new Discord.Client({
 })
 
 client.on('ready', () => {
-    client.user?.setActivity('🎺', { type: 'PLAYING' })
-    const wok = new WOKCommands(client, {
-        // The name of the local folder for your command files
-        commandsDir: path.join(__dirname, 'commands'),
-        // Allow importing of .ts files if you are using ts-node
-        typeScript: true,
-        testServers: ['697496245463154788', '891807820545151007', '743291806917328957'],
-      })
-      .setCategorySettings([
-          {
-              name: 'General',
-              emoji: '🎺'
-          }
-      ])
-      .setBotOwner(['130317861183946753'])
-      .setDisplayName('RYBot')
-      .setDefaultPrefix('?')
-      .setColor('BLUE')
+    new RYBot(client, {
+        testGuilds: ['697496245463154788', '743291806917328957'],
+        commandsDir: path.join(__dirname, '/commands')
+    })
+    .setActivity({type: 'PLAYING', name: '🎺'})
 })
 
 client.login(process.env.TOKEN)
