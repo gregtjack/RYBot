@@ -4,6 +4,7 @@ import RYBotCommand from '../rybommand'
 import ConfirmationDialogue from '../util/confirm'
 
 export default {
+    type: 'SLASH',
     data: new SlashCommandBuilder()
         .setName('event')
         .setDescription('Create an event')
@@ -35,6 +36,8 @@ export default {
         ),
 
     execute: async (interaction, args) => {
+        if (!interaction) return
+        if (!args) return
         new ConfirmationDialogue(interaction).send("Create the event?", async (status) => {
             const [title, description, where, when, lifetime] = args
 

@@ -15,7 +15,8 @@ const client = new Discord.Client({
 client.on('ready', () => {
     new RYBot(client, {
         testGuilds: ['697496245463154788', '743291806917328957'],
-        commandsDir: path.join(__dirname, '/commands')
+        commandsDir: path.join(__dirname, '/commands'),
+        prefix: '?'
     })
     .setActivity({type: 'PLAYING', name: '🎺'})
 })

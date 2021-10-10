@@ -4,7 +4,8 @@
   "description": "A Discord bot made for the RYB Server",
   "main": "index.js",
   "scripts": {
-    "start": "node src/bot.js"
+    "prod": "tsc && pm2 start index.js",
+    "start": "ts-node index.ts"
   },
   "keywords": [],
   "author": "",

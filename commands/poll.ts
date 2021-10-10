@@ -6,6 +6,7 @@ import ConfirmationDialogue from "../util/confirm";
 
 
 export default {
+    type: 'SLASH',
     data: new SlashCommandBuilder()
         .setName('poll')
         .setDescription('Create a poll')
@@ -65,7 +66,7 @@ export default {
                 .setDescription('Eighth option')
                 .setRequired(false)),
 
-    async execute(interaction: CommandInteraction, args: string[]) {
+    execute: async (interaction: CommandInteraction, args: string[]) => {
         const [title, time, show_names, ...options]: string[] = args
         const row = new MessageActionRow()
         const menu = new MessageSelectMenu()
@@ -102,12 +103,6 @@ export default {
             )
 
         options.forEach((option, i) => {
-            // row.addComponents(new MessageButton()
-            //     .setCustomId(`option_${i}`)
-            //     .setLabel(option)
-            //     .setStyle(Discord.Constants.MessageButtonStyles.PRIMARY)
-            // )
-            
             optionIdToName.set(`option_${i}`, option)
             votes.set(`option_${i}`, 0)
             if (show_names == 'true') {
@@ -141,7 +136,7 @@ export default {
                         // On a button press
     
                         collector.on('collect', async (click: SelectMenuInteraction) => {
-                            console.log(click)
+                            console.log(click.user.username + ' clicked on menu item ' + click.values[0])
                             if (!hasVoted.has(click.user.id)) {
                                 hasVoted.set(click.user.id, true);
                                 if (voters.get(click.values[0])) {
@@ -186,6 +181,7 @@ export default {
                     // Called when time runs out
 
                     collector.on('end', (collection) => {
+                        console.log(user?.displayName + '\'s poll has ended')
                         const newEmbed = new MessageEmbed()
                             .setAuthor(`${user?.displayName ?? interaction.user.username}'s poll`,
                                 interaction.user.displayAvatarURL())
@@ -215,14 +211,6 @@ export default {
                         poll.edit({
                             embeds: [newEmbed],
                             components: []
-                        })
-
-                        const announcementEmbed = new MessageEmbed()
-                            .setTitle('Results are in 🗳')
-                            .setColor('GREEN')
-
-                        poll.reply({
-                            embeds: [announcementEmbed]
                         })
                     })
                 }
