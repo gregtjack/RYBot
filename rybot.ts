@@ -10,12 +10,18 @@ export default class RYBot {
     private client: Client
     private guilds: string[]
     private prefix: string
+    private token: string
+    private client_id: string
     private commandsDir: string
+    private featuresDir: string
     private commands: Collection<string, RYBotCommand>
 
-    constructor(client: Client, options: { commandsDir: string, testGuilds: string[], prefix: string }) {
+    constructor(client: Client, options: { commandsDir: string, client_id: string, token: string, featuresDir: string, testGuilds: string[], prefix: string }) {
         this.commandsDir = options.commandsDir
+        this.featuresDir = options.featuresDir
         this.client = client
+        this.token = options.token
+        this.client_id = options.client_id
         this.guilds = options.testGuilds
         this.prefix = options.prefix
         this.commands = new Collection()
@@ -26,12 +32,13 @@ export default class RYBot {
     private async init() {
         const commands: Object[] = [];
         const commandFiles = fs.readdirSync(this.commandsDir).filter(file => file.endsWith('.ts'));
-        const rest = new REST({ version: '9' }).setToken(process.env.TOKEN ?? '')
+        const featureFiles = fs.readdirSync(this.featuresDir).filter(file => file.endsWith('.ts'));
+        const rest = new REST({ version: '9' }).setToken(this.token)
 
         // Import all commands and add them to the bot
 
         for (const file of commandFiles) {
-            const {default: command} = await import('./commands/' + file)
+            const {default: command} = await import(`./commands/${file}`)
             this.commands.set(command.data.name, command)
             // For pushing to the API
             if (command.type == 'SLASH') {
@@ -39,10 +46,17 @@ export default class RYBot {
             }
         }
 
+        // Start all features
+
+        for (const file of featureFiles) {
+            const {default: feature} = await import(`./features/${file}`)
+            if (feature.enabled) feature.start(this.client)
+        }
+
         // Register the commands with the Discord API per guild
 
         this.guilds.forEach(guild => {
-            rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID ?? '', guild), { body: commands })
+            rest.put(Routes.applicationGuildCommands(this.client_id, guild), { body: commands })
             .then(() => console.log('Successfully registered application commands for guild ' + guild))
             .catch(console.error);
         })

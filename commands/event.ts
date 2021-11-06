@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandStringOption } from '@discordjs/builders'
-import Discord, { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
+import Discord, { MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
 import RYBotCommand from '../rybommand'
 import ConfirmationDialogue from '../util/confirm'
 

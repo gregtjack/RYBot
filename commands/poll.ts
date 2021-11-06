@@ -106,7 +106,7 @@ export default {
             optionIdToName.set(`option_${i}`, option)
             votes.set(`option_${i}`, 0)
             if (show_names == 'true') {
-                embed.addField(option, '[0%]')
+                embed.addField(option, '(0) [0%]')
             } else {
                 embed.addField(option, '0 votes [0%]')
             }
@@ -155,7 +155,7 @@ export default {
                                 votes.forEach((v, k) => {
                                     if (show_names == 'true') {
                                         newEmbed.addField(optionIdToName.get(k),
-                                            `${voters.get(k)?.join(', ') ?? ''} [${((v / totalVotes) * 100).toFixed(0)}%]`)
+                                            `${voters.get(k)?.join(', ') ?? ''} (${v}) [${((v / totalVotes) * 100).toFixed(0)}%]`)
                                     } else {
                                         newEmbed.addField(optionIdToName.get(k),
                                             `${v} vote${v == 1 ? '' : 's'} [${((v / totalVotes) * 100).toFixed(0)}%]`)
@@ -201,7 +201,7 @@ export default {
                         votes.forEach((v, k) => {
                             if (show_names == 'true') {
                                 newEmbed.addField(`${winner == k ? '✅' : ''} ${optionIdToName.get(k)}`,
-                                    `${voters.get(k)?.join(', ') ?? ''} [${((v / totalVotes) * 100).toFixed(0)}%]`)
+                                    `${voters.get(k)?.join(', ') ?? ''} (${v}) [${((v / totalVotes) * 100).toFixed(0)}%]`)
                             } else {
                                 newEmbed.addField(`${winner == k ? '✅' : ''} ${optionIdToName.get(k)}`,
                                     `${v} vote${v == 1 ? '' : 's'} [${((v / totalVotes) * 100).toFixed(0)}%]`)
