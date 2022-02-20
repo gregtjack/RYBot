@@ -1,3 +1,8 @@
 # RYBot
 
-A Discord bot made for the RYB Server
+A bot made for the MSOM RYB Trumpet Discord server.
+
+Features:
+* Polls
+* Events
+* Confessions
