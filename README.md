@@ -1,6 +1,6 @@
 # RYBot
 
-A bot made for the MSOM RYB Trumpet Discord server.
+A Discord bot for the MSOM RYB Trumpet server
 
 Features:
 * Polls
