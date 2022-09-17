@@ -21,7 +21,7 @@ export default class ConfirmationDialogue {
      * Send the Dialogue to the user
      * @param message Custom message to show the user
      */
-    public async send(message: string = 'Are you sure?', callback: (status: number) => void) {
+    public async send(message: string = 'Are you sure?'): Promise<boolean> {
         const row = new MessageActionRow()
             .addComponents([               
                 new MessageButton()
@@ -31,13 +31,13 @@ export default class ConfirmationDialogue {
                 new MessageButton()
                 .setCustomId('cancel')
                 .setLabel('Cancel')
-                .setStyle(Discord.Constants.MessageButtonStyles.DANGER)
+                .setStyle(Discord.Constants.MessageButtonStyles.SECONDARY)
             ])
         await this.interaction.reply({
             content: message,
             components: [row],
             ephemeral: true
-        })
+        });
 
         const filter = (btnInt: ButtonInteraction) => {
             return this.interaction.member?.user.id === btnInt.user.id
@@ -47,25 +47,26 @@ export default class ConfirmationDialogue {
             filter,
             max: 1,
             time: 1000 * this.seconds
-        })
-        
-        if (collector)
-            collector.on('end', (collection) => {
+        });
+    
+        return new Promise((resolve, reject) => {
+            collector?.on('end', (collection) => {
                 collection.forEach((click) => {
                     if (click.customId === 'confirm') {
-                        callback(Discord.Constants.MessageButtonStyles.SUCCESS)
                         this.interaction.editReply({
                             content: 'Confirmed',
                             components: []
-                        })
+                        });
+                        resolve(true);
                     } else {
-                        callback(Discord.Constants.MessageButtonStyles.DANGER)
                         this.interaction.editReply({
                             content: 'Cancelled',
                             components: []
-                        })
+                        });
+                        reject('cancelled');
                     }
                 })
-            })
+            });
+        })
     }
 }

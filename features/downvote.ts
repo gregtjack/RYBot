@@ -6,7 +6,7 @@ export default {
         name: 'Downvote',
         description: 'Example feature: reacts with a downvote for every message lol'
     },
-    enabled: false,
+    disabled: true,
     start(client: Client) {
         client.on('messageCreate', async message => {
             await message.react('👎')

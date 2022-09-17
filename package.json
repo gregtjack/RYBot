@@ -1,11 +1,12 @@
 {
   "name": "rybot",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A Discord bot made for the RYB Server",
   "main": "index.js",
   "scripts": {
-    "prod": "tsc && pm2 start pm2.config.js --env production --only NodeServer",
-    "dev": "ts-node index.ts dev"
+    "start": "node build/index.js",
+    "build": "tsc",
+    "dev": "ts-node index.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,20 +16,18 @@
     "@discordjs/rest": "^0.1.0-canary.0",
     "discord-api-types": "^0.23.1",
     "discord.js": "^13.1.0",
-    "dotenv": "^10.0.0",
-    "lavaclient": "^4.0.3",
-    "pretty-ms": "^7.0.1",
-    "ts-node": "^10.2.1"
+    "pretty-ms": "^7.0.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.13"
+    "nodemon": "^2.0.13",
+    "ts-node": "^10.9.1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gregorious-j/RYBot.git"
+    "url": "git+https://github.com/gregtjack/RYBot.git"
   },
   "bugs": {
-    "url": "https://github.com/gregorious-j/RYBot/issues"
+    "url": "https://github.com/gregtjack/RYBot/issues"
   },
-  "homepage": "https://github.com/gregorious-j/RYBot#readme"
+  "homepage": "https://github.com/gregtjack/RYBot#readme"
 }

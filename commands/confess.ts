@@ -7,28 +7,34 @@ export default {
     type: 'SLASH',
     data: new SlashCommandBuilder()
         .setName('confess')
-        .setDescription('Acknowledge your sins. Fully anonymous.')
+        .setDescription('Fully anonymous message')
         .addStringOption(
             new SlashCommandStringOption()
-                .setName('confession')
+                .setName('subject')
                 .setRequired(true)
-                .setDescription('What do you wish to share')
-    ),
+                .setDescription('Write anything')
+        )
+        .addStringOption(
+            new SlashCommandStringOption()
+                .setName('body')
+                .setRequired(true)
+                .setDescription('Write anything')
+        ),
     execute: async (interaction, args) => {
         if (!interaction) return
         if (!args) return
-        new ConfirmationDialogue(interaction).send("Are you sure you want to confess?", async (status) => {
-            const [confession] = args
-            if (status == Discord.Constants.MessageButtonStyles.SUCCESS) {
-                interaction.channel?.send({
-                    embeds: [
-                        new MessageEmbed()
-                            .setTitle('Confession')
-                            .setDescription(confession)
-                            .setColor('#ffffff')
-                    ]
-                })
-            }
-        })
+        const [title, confession] = args
+        const confirm = new ConfirmationDialogue(interaction)
+        const status = await confirm.send(`Are you sure you want to send "${confession}"?`);
+        if (status) {
+            interaction.channel?.send({
+                embeds: [
+                    new MessageEmbed()
+                        .setTitle(title)
+                        .setDescription(confession)
+                        .setColor('#ffffff')
+                ]
+            })
+        }
     }
 } as RYBotCommand

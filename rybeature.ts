@@ -5,6 +5,6 @@ export default interface RYBotFeature {
         name: string,
         description: string
     },
-    enabled: boolean,
+    disabled?: boolean,
     start(client: Client): void
 }
