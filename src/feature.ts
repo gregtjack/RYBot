@@ -1,6 +1,6 @@
 import { Client } from "discord.js";
 
-export default interface RYBotFeature {
+export default interface Feature {
     data: {
         name: string,
         description: string

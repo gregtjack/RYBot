@@ -1,4 +1,4 @@
-import Discord, { ButtonInteraction, MessageActionRow, MessageButton } from 'discord.js'
+import Discord, { ButtonInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js'
 
 export default class ConfirmationDialogue {
 
@@ -22,16 +22,16 @@ export default class ConfirmationDialogue {
      * @param message Custom message to show the user
      */
     public async send(message: string = 'Are you sure?'): Promise<boolean> {
-        const row = new MessageActionRow()
+        const row = new ActionRowBuilder<ButtonBuilder>()
             .addComponents([               
-                new MessageButton()
+                new ButtonBuilder()
                 .setCustomId('confirm')
                 .setLabel('Confirm')
-                .setStyle(Discord.Constants.MessageButtonStyles.SUCCESS),
-                new MessageButton()
+                .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
                 .setCustomId('cancel')
                 .setLabel('Cancel')
-                .setStyle(Discord.Constants.MessageButtonStyles.SECONDARY)
+                .setStyle(ButtonStyle.Secondary)
             ])
         await this.interaction.reply({
             content: message,
@@ -39,12 +39,7 @@ export default class ConfirmationDialogue {
             ephemeral: true
         });
 
-        const filter = (btnInt: ButtonInteraction) => {
-            return this.interaction.member?.user.id === btnInt.user.id
-        }
-
         const collector = this.interaction?.channel?.createMessageComponentCollector({
-            filter,
             max: 1,
             time: 1000 * this.seconds
         });

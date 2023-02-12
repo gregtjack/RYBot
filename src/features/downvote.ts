@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import RYBotFeature from "../rybeature";
+import RYBotFeature from "../feature";
 
 export default {
     data: {

@@ -2,22 +2,23 @@ import { ActivitiesOptions, Client, Collection } from "discord.js";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import fs from "fs";
-import RYBotCommand from "./rybommand";
+import Command from "./command";
+import { Logger } from "pino";
 
 // Custom wrapper for a Discord.js client
 
-export default class RYBot {
-    private client: Client;
+export default class RYBotClient {
     private guilds: string[];
     private prefix: string;
     private token: string;
     private client_id: string;
     private commandsDir: string;
     private featuresDir: string;
-    private commands: Collection<string, RYBotCommand>;
+    private commands: Collection<string, Command>;
 
     constructor(
-        client: Client,
+        private client: Client,
+        private logger: Logger,
         options: {
             commandsDir: string;
             client_id: string;
@@ -37,47 +38,49 @@ export default class RYBot {
         this.commands = new Collection();
     }
 
-    private async init() {
+    private async load() {
         const commands: Object[] = [];
         const commandFiles = fs
             .readdirSync(this.commandsDir)
-            .filter((file) => file.endsWith(".ts"));
+            .filter((file) => file.endsWith('.ts') || file.endsWith('.js'));
         const featureFiles = fs
             .readdirSync(this.featuresDir)
-            .filter((file) => file.endsWith(".ts"));
+            .filter((file) => file.endsWith('.ts') || file.endsWith('.js'));
         const rest = new REST({ version: '10' }).setToken(this.token);
 
-        // Import all commands and add them to the bot
-
+        // Import all commands
         for (const file of commandFiles) {
             const { default: command } = await import(`./commands/${file}`);
-            this.commands.set(command.data.name, command);
-            // For pushing to the API
-            if (command.type == "SLASH") {
-                commands.push(command.data.toJSON());
+            if (!command.disabled) {
+                this.logger.info(`Registering command '${command.options.name}'`)
+                this.commands.set(command.options.name, command);
+                // For pushing to the API
+                if (command.type == 'SLASH') {
+                    commands.push(command.options.toJSON());
+                }
             }
         }
 
         // Start all features
-
         for (const file of featureFiles) {
             const { default: feature } = await import(`./features/${file}`);
             if (!feature.disabled) feature.start(this.client);
         }
 
         // Register the commands with the Discord API per guild
-
         this.guilds.forEach(async (guild) => {
-            const data = await rest.put(Routes.applicationGuildCommands(this.client_id, guild), {
+            await rest.put(Routes.applicationGuildCommands(this.client_id, guild), {
                 body: commands,
             });
-            console.log(`Successfully registered commands`); 
+            this.logger.info(`Successfully registered commands with the API`); 
         });
     }
 
     public start() {
-        this.init();
-        this.client.on("interactionCreate", async (interaction) => {
+        // Load commands and features
+        this.load();
+
+        this.client.on('interactionCreate', async (interaction) => {
             if (!interaction.isCommand()) return;
 
             const command = this.commands.get(interaction.commandName);
@@ -85,6 +88,7 @@ export default class RYBot {
             if (!command) return;
 
             let args: string[] = [];
+
             interaction.options.data.forEach((option) => {
                 const { value: val } = option;
                 if (val != undefined) args.push(val.toString());
@@ -93,9 +97,9 @@ export default class RYBot {
             try {
                 command.execute(interaction, args);
             } catch (error) {
-                console.error(error);
+                this.logger.error(error);
                 await interaction.reply({
-                    content: "There was an error while executing this command",
+                    content: 'There was an error while executing this command',
                     ephemeral: true,
                 });
             }

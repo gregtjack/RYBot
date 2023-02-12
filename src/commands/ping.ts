@@ -1,15 +1,15 @@
-import RYBotCommand from "../rybommand";
+import Command from "../command";
 
 export default {
     type: 'LEGACY',
-    data: {
+    options: {
         name: 'ping',
         description: 'ping the bot to test uptime and latency'
     }, 
-    execute: async (interaction, args, message) => {
+    execute: async (_interaction, _args, message) => {
         if (!message) return
         message.reply({
             content: 'Pong!'
         })
     }
-} as RYBotCommand
+} as Command;
