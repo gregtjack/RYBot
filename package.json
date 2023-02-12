@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc --noEmit",
+    "build": "tsc",
     "dev": "ts-node --swc src/index.ts | pino-pretty"
   },
   "keywords": [],
