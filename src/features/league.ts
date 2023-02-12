@@ -1,11 +1,10 @@
-import { Utils } from "discord-api-types";
 import { Client } from "discord.js";
-import RYBotFeature from "../feature";
+import { Feature } from "../rybot.types";
 
 export default {
     data: {
         name: '',
-        description: 'Will ban* anyone who plays League for more than 30 minutes.\n\n\n\n\n*jk haha.. unless'
+        description: 'Will ban anyone who plays League for more than 30 minutes'
     },
     disabled: true,
     start(client: Client) {
@@ -18,4 +17,4 @@ export default {
                 ?.presences)
         }, seconds * 1000)
     }
-} as RYBotFeature
+} as Feature

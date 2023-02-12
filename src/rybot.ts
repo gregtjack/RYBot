@@ -2,7 +2,7 @@ import { ActivitiesOptions, Client, Collection } from "discord.js";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import fs from "fs";
-import Command from "./command";
+import { Command } from "./rybot.types";
 import { Logger } from "pino";
 
 // Custom wrapper for a Discord.js client

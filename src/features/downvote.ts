@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import RYBotFeature from "../feature";
+import { Feature } from "../rybot.types";
 
 export default {
     data: {
@@ -12,4 +12,4 @@ export default {
             await message.react('👎')
         })
     }
-} as RYBotFeature
+} as Feature
