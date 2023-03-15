@@ -2,7 +2,7 @@ import {
     SlashCommandBuilder,
     SlashCommandStringOption,
 } from "@discordjs/builders";
-import { CacheType, CommandInteraction, EmbedBuilder } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import { Command } from "../rybot.types";
 import ConfirmationDialogue from "../util/confirm";
 

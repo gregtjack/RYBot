@@ -2,10 +2,8 @@ import { Client } from "discord.js";
 import { Feature } from "../rybot.types";
 
 export default {
-    data: {
-        name: '',
-        description: 'Will ban anyone who plays League for more than 30 minutes'
-    },
+    name: 'Take a shower immediately',
+    description: 'Will ban anyone who plays League for more than 30 minutes',
     disabled: true,
     start(client: Client) {
         const rybiscord = '743291806917328957'

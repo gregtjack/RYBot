@@ -7,11 +7,12 @@ import {
 import {
     ActionRowBuilder,
     APIEmbedField,
-    ButtonBuilder,
     ButtonInteraction,
-    ButtonStyle,
     CommandInteraction,
     EmbedBuilder,
+    Events,
+    StringSelectMenuBuilder,
+    StringSelectMenuInteraction,
     ThreadAutoArchiveDuration,
 } from "discord.js";
 import prettyMilliseconds from "pretty-ms";
@@ -103,16 +104,19 @@ export default {
     execute: async (interaction: CommandInteraction, args: string[]) => {
         const [title, time, anonymous, createThread, ...optionNames]: string[] =
             args;
+
         const options = optionNames.map((option, i) => {
+            console.log(option);
             return {
                 value: "option_" + i,
                 label: option,
             };
         });
-        const row = new ActionRowBuilder<ButtonBuilder>();
+
+        const row = new ActionRowBuilder<StringSelectMenuBuilder>();
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setColor("Yellow")
+            .setColor("Random")
             .setFooter({
                 text: `this poll ends in ${prettyMilliseconds(
                     parseFloat(time) * 1000 * 60 * 60,
@@ -136,29 +140,33 @@ export default {
             ...options.map((option) => {
                 optionIdToName.set(option.value, option.label);
                 if (anonymous === "true") {
-                    return { name: option.label, value: "0 votes [0%]" };
+                    return { name: option.label, value: "0%" };
                 } else {
-                    return { name: option.label, value: "(0) [0%]" };
+                    return { name: option.label, value: "0%" };
                 }
             })
         );
 
         row.addComponents(
-            ...options.map((option) => {
-                return new ButtonBuilder()
-                    .setCustomId(option.value)
-                    .setLabel(option.label)
-                    .setStyle(ButtonStyle.Primary);
-            })
+            new StringSelectMenuBuilder()
+                .setCustomId('select')
+                .setPlaceholder("Select an option")
+                .addOptions(
+                    ...options.map((option) => {
+                        return {
+                            label: option.label,
+                            description: option.value,
+                            value: option.value,
+                        }
+                    })
+                )
         );
 
         // Ask the user to confirm
 
         const confirm = new ConfirmationDialogue(interaction, 60);
         const confirmed = await confirm.send(
-            `**Create the poll?**\n**title**: ${title}\n**time**: ${time} hours\n**anonymous**: ${anonymous}\n**choices**: ${options
-                .map((e) => e.label)
-                .join(", ")}`
+            `Create poll?\ntitle: ${title}\ntime: ${time} hours\nanonymous: ${anonymous}\nchoices: ${options.map((e) => e.label).join(", ")}`
         );
 
         if (!confirmed) {
@@ -195,63 +203,43 @@ export default {
             return total;
         };
 
-        collector?.on("collect", async (i: ButtonInteraction) => {
+        collector?.on('collect', async (i: StringSelectMenuInteraction) => {
+            const [username, userId, voteLabel] = [i.user.username, i.user.id, i.values[0]];
             logger.info(
-                `Poll ${title}: ${
-                    i.user.username
-                } voted for '${optionIdToName.get(i.customId)}'`
+                `Poll ${title}: ${username} voted for '${optionIdToName.get(voteLabel)}'`
             );
             votes = new Map<string, string[]>();
             options.forEach((o) => votes.set(o.value, []));
-            voters.set(i.user.id, i.customId);
-            voters.forEach((option, userId) =>
+            voters.set(userId, voteLabel);
+            voters.forEach((option, id) =>
                 votes.get(option)
-                    ? votes.get(option)?.push(userId)
-                    : votes.set(option, [userId])
-            );
+                    ? votes.get(option)?.push(id)
+                    : votes.set(option, [id]));
 
-            const newPoll = new EmbedBuilder()
-                .setAuthor({
-                    name: `${
-                        user?.displayName ?? interaction.user.username
-                    }'s poll`,
-                    iconURL: interaction.user.displayAvatarURL(),
-                })
-                .setTitle(title)
-                .setColor("Yellow")
+            const newPoll = embed
+                .setFields()
                 .setFooter({
-                    text: `This poll ends in ${prettyMilliseconds(
-                        timeCreated +
-                            parseFloat(time) * 1000 * 60 * 60 -
-                            Date.now(),
-                        { compact: true }
-                    )}`,
+                    text: `This poll ends in ${prettyMilliseconds(timeCreated + parseFloat(time) * 1000 * 60 * 60 - Date.now(), { compact: true })}`,
                 });
 
+            let newFields: APIEmbedField[] = [];
             votes.forEach((users, option) => {
-                newPoll.addFields({
+                const ratio = ((users.length / getTotalVotes()) * 100).toFixed(0);
+                newFields.push({
                     name: optionIdToName.get(option),
                     value:
                         anonymous === "true"
-                            ? `${users.length} vote${
-                                  users.length == 1 ? "" : "s"
-                              } [${(
-                                  (users.length / getTotalVotes()) *
-                                  100
-                              ).toFixed(0)}%]`
-                            : `(${users.length}) ${
-                                  users.map((e) => `<@${e}>`).join(" ") ?? ""
-                              } [${(
-                                  (users.length / getTotalVotes()) *
-                                  100
-                              ).toFixed(0)}%]`,
+                            ? `${users.length} vote${users.length == 1 ? "" : "s"} (${ratio}%)`
+                            : `${users.map((user) => `<@${user}>`).join(' ') ?? ''} (${ratio}%)`,
                 });
             });
+
+            newPoll.addFields(newFields);
 
             poll?.edit({ embeds: [newPoll] });
 
             i.reply({
-                content: `You voted for "${optionIdToName.get(i.customId)}"`,
+                content: `You voted for "${optionIdToName.get(i.values[0])}"`,
                 ephemeral: true,
             });
         });
@@ -263,17 +251,16 @@ export default {
             );
             const newEmbed = new EmbedBuilder()
                 .setAuthor({
-                    name: `${
-                        user?.displayName ?? interaction.user.username
-                    }'s poll`,
+                    name: `${user?.displayName ?? interaction.user.username
+                        }'s poll`,
                     iconURL: interaction.user.displayAvatarURL(),
                 })
                 .setTitle(title)
                 .setColor("Green")
                 .setFooter({ text: "Voting has ended" });
+
             let maxVotes = 0;
             let winner = "";
-
             votes.forEach((voters, optionId) => {
                 if (voters.length > maxVotes) {
                     maxVotes = voters.length;
@@ -283,26 +270,18 @@ export default {
 
             const fields: APIEmbedField[] = [];
             votes.forEach((voters: string[], optionId: string) => {
-                const name = `${
-                    winner === optionId ? "✅" : ""
-                } ${optionIdToName.get(optionId)}`;
+                const ratio = ((voters.length / getTotalVotes()) * 100).toFixed(0);
+                const name = `${winner === optionId ? '✅' : ''} ${optionIdToName.get(optionId)}`;
+
                 if (anonymous === "true") {
                     fields.push({
                         name,
-                        value: `${voters.length} vote${
-                            voters.length == 1 ? "" : "s"
-                        } [${((voters.length / getTotalVotes()) * 100).toFixed(
-                            0
-                        )}%]`,
+                        value: `${voters.length} vote${voters.length === 1 ? '' : 's'} (${ratio}%)`,
                     });
                 } else {
                     fields.push({
                         name,
-                        value: `(${voters.length}) ${
-                            voters.map((e) => `<@${e}>`).join(" ") ?? ""
-                        } [${((voters.length / getTotalVotes()) * 100).toFixed(
-                            0
-                        )}%]`,
+                        value: `${voters.map((e) => `<@${e}>`).join(" ") ?? ''} (${ratio}%)`,
                     });
                 }
             });

@@ -6,28 +6,34 @@ import pino from "pino";
 dotenv.config();
 
 const logger = pino();
-const token = process.env.TOKEN;
-const client_id = process.env.CLIENT_ID ?? "";
-
+const token = extractEnvVar('TOKEN');
 const client = new Client({
     intents: [GatewayIntentBits.Guilds],
 });
 
 client.on("ready", () => {
-    const devGuild = process.env.DEV_GUILD ?? "";
-    const guild = process.env.GUILD ?? "";
-    const bot = new RYBotClient(client, logger, {
+    const devGuild = extractEnvVar('DEV_GUILD');
+    const guild = extractEnvVar('GUILD');
+    const bot = new RYBotClient(client, {
         testGuilds: [guild, devGuild],
-        token: token ?? "",
-        client_id: client_id ?? "",
+        token,
+        client_id: extractEnvVar('CLIENT_ID'),
         commandsDir: path.join(__dirname, "commands"),
         featuresDir: path.join(__dirname, "features"),
-        prefix: "?",
+        legacyPrefix: '?',
     });
-    bot.setActivity({ name: "🎺", type: ActivityType.Playing });
+    bot.setActivity({ name: '🎺', type: ActivityType.Playing });
     bot.start();
     logger.info("RYBot is online");
 });
+
+function extractEnvVar(key: keyof NodeJS.ProcessEnv): string {
+    const value = process.env[key];
+    if (value === undefined) {
+        throw new Error(`The environment variable "${key}" cannot be undefined`);
+    }
+    return value;
+}
 
 if (token) {
     client.login(token);

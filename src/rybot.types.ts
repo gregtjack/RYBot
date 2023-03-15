@@ -1,12 +1,11 @@
 import { Client, CommandInteraction, Message } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
 
-interface Command {
-    type: "SLASH" | "LEGACY";
-    options:
-        | SlashCommandBuilder
-        | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">
-        | { name: string; description: string };
+export type CommandType = 'SLASH' | 'LEGACY';
+
+export interface Command {
+    type: CommandType;
+    options: SlashCommandBuilder | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
     disabled?: boolean;
     execute(
         command?: CommandInteraction,
@@ -15,13 +14,9 @@ interface Command {
     ): void;
 }
 
-interface Feature {
-    data: {
-        name: string;
-        description: string;
-    };
+export interface Feature {
+    name: string;
+    description: string;
     disabled?: boolean;
     start(client: Client): void;
 }
-
-export { Feature, Command };
