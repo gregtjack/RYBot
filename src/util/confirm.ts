@@ -52,7 +52,7 @@ export default class ConfirmationDialogue {
                             content: "Cancelled",
                             components: [],
                         });
-                        reject("cancelled");
+                        reject(false);
                     }
                 });
             });
