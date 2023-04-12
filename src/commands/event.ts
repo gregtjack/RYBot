@@ -58,15 +58,15 @@ export default {
     execute: async (interaction, args) => {
         if (!interaction) return;
         if (!args) return;
+        const [title, description, pingEveryone, where, when, lifetime] = args;
         const confirm = new ConfirmationDialogue(interaction);
         const res = await confirm.send("Create the event?");
-        const [title, description, pingEveryone, where, when, lifetime] = args;
 
-        let people: Map<string, string> = new Map();
         if (!res) {
             return;
         }
         
+        let people: Map<string, string> = new Map();
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents([
             new ButtonBuilder()
                 .setCustomId("going")
@@ -97,7 +97,7 @@ export default {
 
         if (interaction.channel) {
             const message = {
-                content: "",
+                content: '',
                 embeds: [embed],
                 components: [row],
             };

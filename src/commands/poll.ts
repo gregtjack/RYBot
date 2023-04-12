@@ -150,23 +150,24 @@ export default {
         row.addComponents(
             new StringSelectMenuBuilder()
                 .setCustomId('select')
-                .setPlaceholder("Select an option")
+                .setPlaceholder('Select an option')
                 .addOptions(
                     ...options.map((option) => {
                         return {
                             label: option.label,
                             description: option.value,
                             value: option.value,
-                        }
+                        };
                     })
                 )
         );
 
         // Ask the user to confirm
 
-        const confirm = new ConfirmationDialogue(interaction, 60);
-        const confirmed = await confirm.send(
-            `Create poll?\ntitle: ${title}\ntime: ${time} hours\nanonymous: ${anonymous}\nchoices: ${options.map((e) => e.label).join(", ")}`
+        const confirmed = await new ConfirmationDialogue(interaction, 60).send(
+            `Create poll?\ntitle: ${title}\ntime: ${time} hours\nanonymous: ${anonymous}\nchoices: ${options
+                .map((e) => e.label)
+                .join(", ")}`
         );
 
         if (!confirmed) {
@@ -204,9 +205,15 @@ export default {
         };
 
         collector?.on('collect', async (i: StringSelectMenuInteraction) => {
-            const [username, userId, voteLabel] = [i.user.username, i.user.id, i.values[0]];
+            const [username, userId, voteLabel] = [
+                i.user.username,
+                i.user.id,
+                i.values[0],
+            ];
             logger.info(
-                `Poll ${title}: ${username} voted for '${optionIdToName.get(voteLabel)}'`
+                `Poll ${title}: ${username} voted for '${optionIdToName.get(
+                    voteLabel
+                )}'`
             );
             votes = new Map<string, string[]>();
             options.forEach((o) => votes.set(o.value, []));
@@ -214,23 +221,34 @@ export default {
             voters.forEach((option, id) =>
                 votes.get(option)
                     ? votes.get(option)?.push(id)
-                    : votes.set(option, [id]));
+                    : votes.set(option, [id])
+            );
 
-            const newPoll = embed
-                .setFields()
-                .setFooter({
-                    text: `This poll ends in ${prettyMilliseconds(timeCreated + parseFloat(time) * 1000 * 60 * 60 - Date.now(), { compact: true })}`,
-                });
+            const newPoll = embed.setFields().setFooter({
+                text: `This poll ends in ${prettyMilliseconds(
+                    timeCreated +
+                        parseFloat(time) * 1000 * 60 * 60 -
+                        Date.now(),
+                    { compact: true }
+                )}`,
+            });
 
             let newFields: APIEmbedField[] = [];
             votes.forEach((users, option) => {
-                const ratio = ((users.length / getTotalVotes()) * 100).toFixed(0);
+                const ratio = ((users.length / getTotalVotes()) * 100).toFixed(
+                    0
+                );
                 newFields.push({
                     name: optionIdToName.get(option),
                     value:
-                        anonymous === "true"
-                            ? `${users.length} vote${users.length == 1 ? "" : "s"} (${ratio}%)`
-                            : `${users.map((user) => `<@${user}>`).join(' ') ?? ''} (${ratio}%)`,
+                        anonymous === 'true'
+                            ? `${users.length} vote${
+                                  users.length == 1 ? "" : "s"
+                              } (${ratio}%)`
+                            : `${
+                                  users.map((user) => `<@${user}>`).join(" ") ??
+                                  ''
+                              } (${ratio}%)`,
                 });
             });
 
@@ -251,8 +269,9 @@ export default {
             );
             const newEmbed = new EmbedBuilder()
                 .setAuthor({
-                    name: `${user?.displayName ?? interaction.user.username
-                        }'s poll`,
+                    name: `${
+                        user?.displayName ?? interaction.user.username
+                    }'s poll`,
                     iconURL: interaction.user.displayAvatarURL(),
                 })
                 .setTitle(title)
@@ -270,18 +289,26 @@ export default {
 
             const fields: APIEmbedField[] = [];
             votes.forEach((voters: string[], optionId: string) => {
-                const ratio = ((voters.length / getTotalVotes()) * 100).toFixed(0);
-                const name = `${winner === optionId ? '✅' : ''} ${optionIdToName.get(optionId)}`;
+                const ratio = ((voters.length / getTotalVotes()) * 100).toFixed(
+                    0
+                );
+                const name = `${
+                    winner === optionId ? "✅" : ""
+                } ${optionIdToName.get(optionId)}`;
 
                 if (anonymous === "true") {
                     fields.push({
                         name,
-                        value: `${voters.length} vote${voters.length === 1 ? '' : 's'} (${ratio}%)`,
+                        value: `${voters.length} vote${
+                            voters.length === 1 ? "" : "s"
+                        } (${ratio}%)`,
                     });
                 } else {
                     fields.push({
                         name,
-                        value: `${voters.map((e) => `<@${e}>`).join(" ") ?? ''} (${ratio}%)`,
+                        value: `${
+                            voters.map((e) => `<@${e}>`).join(" ") ?? ""
+                        } (${ratio}%)`,
                     });
                 }
             });
